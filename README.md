@@ -1,68 +1,149 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+##React base
+version 1.0.2
 
-## Available Scripts
+###TL;DR
+React base offers a bootstrap project including React-redux ant yahoo-intl for quickly starting a new project. It aims to reduce code duplication and improve readability of the features provided by React-redux and reusage of reducers and actions.
 
-In the project directory, you can run:
+###Introduction
+React and especially redux has a steep learning curve and is hard to understand, which makes it hard to use it. In order to make life easier and to get started more quickly, React base comes as a solution..
 
-### `npm start`
+###Core functionalities
+* Pre-defined map structure for easy organising your project
+* Method called reducer types
+* Action namespaces
+* Global reducer state and methods
+* Reducer namespaces
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+###Example 
+For a clear understanding the way React base works, an example notification feature is provided.  
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+Actions
+```javascript
+import Action from "./Action";
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+class NotificationAction extends Action {
 
-### `npm run build`
+    constructor() {
+        super();
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+        this.namespace = "notifications";
+    }
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+    /**
+    * Clear all or a specific notification
+    * 
+    * @param index
+    * @param dispatch
+    */
+    clear(index = null, dispatch) {
+        dispatch(this.dispatch('notifications.clear', {index}))
+    }
+}
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+export default NotificationAction;
+```
 
-### `npm run eject`
+Reducer
+```javascript
+import Reducer from "./Reducer";
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+class NotificationReducer extends Reducer {
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    initialState = {
+        all: []
+    };
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+    static namespace = "notifications";
+    
+    /**
+    * Add notification to the notification array
+    * 
+    * @param level
+    * @param message
+    * @param state
+    * @returns {{all: *[]}}
+    * @private
+    */
+    _show(level, message, state) {
+        return {
+            all: [
+                ...state.all,
+                {type: "danger", message: message, index: state.all.length}
+            ]
+        }
+    }
+    
+    /**
+    * Shortcut for adding a danger alert
+    * @param action
+    * @param state
+    * @returns {{all: *[]}}
+    */
+    danger(action, state) {
+        return this._show("danger", action.payload, state)
+    }
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+    /**
+     * Clears all or a specific notification
+     * 
+     * @param action
+     * @param state
+     * @returns {{all: Array}}
+     */
+    clear(action, state) {
+        let index = action.payload && action.payload.index ? 
+                    state.all.indexOf(action.payload.index) : 
+                    -1;
 
-## Learn More
+        if(index > -1) {
+            state.all.splice(index, 1);
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+            return {
+                all: state.all
+            }
+        }
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+        return {
+            all: []
+        }
+    }
+}
 
-### Code Splitting
+export default NotificationReducer;
+```
+which is added in the rootreducer (app/reducers/index.js)
+```javascript
+import { combineReducers } from "redux";
+import NotificationReducer from "./NotificationReducer";
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+export default combineReducers({
+    notification: (...args) => new NotificationReducer().call(...args),
+})
+```
+A lambda expression is used in the rootreducer because the scope should lie in the Reducer, not within Redux, which is the case by default.
 
-### Analyzing the Bundle Size
+The notification action can now be called within another action like so:
+```javascript
+dispatch(this.dispatch("notifications.danger", "Danger message"));
+```
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+And all the notifications can be stored in the props of a component using, where `mapStateToProps` is added to the global redux state as usual:
 
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+```javascript
+function mapStateToProps(state) {
+    return {
+        auth: state.auth,
+        notifications: state.notifications.all
+    }
+}
+```
+and used within the component like:
+```javascript
+{this.props.notifications.length ? this.props.notifications.map((notification, i) =>
+    <Notification type={notification.type} index={notification.index} key={i} isDismissable={true}>
+        {notification.message}
+    </Notification>) :
+null}
+```
+Happy hacking!
