@@ -1,20 +1,20 @@
-##React base
+## React base
 version 1.0.2
 
-###TL;DR
+### TL;DR
 React base offers a bootstrap project including React-redux ant yahoo-intl for quickly starting a new project. It aims to reduce code duplication and improve readability of the features provided by React-redux and reusage of reducers and actions.
 
 ###Introduction
 React and especially redux has a steep learning curve and is hard to understand, which makes it hard to use it. In order to make life easier and to get started more quickly, React base comes as a solution..
 
-###Core functionalities
+### Core functionalities
 * Pre-defined map structure for easy organising your project
 * Method called reducer types
 * Action namespaces
 * Global reducer state and methods
 * Reducer namespaces
 
-###Example 
+### Example 
 For a clear understanding the way React base works, an example notification feature is provided.  
 
 Actions
