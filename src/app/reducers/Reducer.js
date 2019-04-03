@@ -19,7 +19,7 @@ class Reducer {
             let reduceAction = action.type.split(".");
 
             if(reduceAction[0] === this.constructor.namespace && this[reduceAction[1]]) {
-                let reducedState = this[reduceAction[1]].call(this, action, state);
+                let reducedState = this[reduceAction[1]].call(this, action.payload, state);
                 return {...state, ...reducedState};
             }
         }

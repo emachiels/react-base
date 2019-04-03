@@ -1,5 +1,5 @@
 ## React base
-version 1.0.2
+version 1.0.3
 
 ### TL;DR
 React base offers a bootstrap project including React-redux ant yahoo-intl for quickly starting a new project. It aims to reduce code duplication and improve readability of the features provided by React-redux and reusage of reducers and actions.
@@ -65,35 +65,35 @@ class NotificationReducer extends Reducer {
     * @returns {{all: *[]}}
     * @private
     */
-    _show(level, message, state) {
+    _show(level, payload, state) {
         return {
             all: [
                 ...state.all,
-                {type: level, message: message, index: state.all.length}
+                {type: level, message: payload, index: state.all.length}
             ]
         }
     }
     
     /**
     * Shortcut for adding a danger alert
-    * @param action
+    * @param payload
     * @param state
     * @returns {{all: *[]}}
     */
-    danger(action, state) {
-        return this._show("danger", action.payload, state)
+    danger(payload, state) {
+        return this._show("danger", payload, state)
     }
 
     /**
      * Clears all or a specific notification
      * 
-     * @param action
+     * @param payload
      * @param state
      * @returns {{all: Array}}
      */
-    clear(action, state) {
-        let index = action.payload && action.payload.index ? 
-                    state.all.indexOf(action.payload.index) : 
+    clear(payload, state) {
+        let index = payload && payload.index ? 
+                    state.all.indexOf(payload.index) : 
                     -1;
 
         if(index > -1) {
@@ -125,7 +125,7 @@ A lambda expression is used in the rootreducer because the scope should lie in t
 
 The notification action can now be called within another action like so:
 ```javascript
-dispatch(this.dispatch("notifications.danger", "Danger message"));
+dispatch(this.dispatch("notifications.danger", /* payload */ "Danger message"));
 ```
 
 And all the notifications can be stored in the props of a component using, where `mapStateToProps` is added to the global redux state as usual:
