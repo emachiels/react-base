@@ -69,7 +69,7 @@ class NotificationReducer extends Reducer {
         return {
             all: [
                 ...state.all,
-                {type: "danger", message: message, index: state.all.length}
+                {type: level, message: message, index: state.all.length}
             ]
         }
     }
